@@ -30,6 +30,7 @@ export const OfferSchema = z.object({
   offerType: z.string(),
   tags: z.array(z.string()),
   redemptionType: z.string(),
+  final_score: z.number().optional(),
 });
 export type Offer = z.infer<typeof OfferSchema>;
 
@@ -67,9 +68,11 @@ function OfferImage({ src, alt }: { src: string; alt: string }) {
 
 function OfferCard({
   offer,
+  showDebugInfo,
   onClick,
 }: {
   offer: Offer;
+  showDebugInfo: boolean;
   onClick: (offer: Offer) => void;
 }) {
   return (
@@ -106,6 +109,12 @@ function OfferCard({
             ))}
           </div>
         </div>
+        {showDebugInfo ? (
+          <div className="space-y-1 text-sm text-muted-foreground">
+            <p>Debug info</p>
+            <p>Offer Final Score: {offer.final_score}</p>
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );
@@ -190,9 +199,10 @@ function OfferDrawer({
 
 export type OffersListProps = {
   offers: Offer[];
+  showDebugInfo: boolean;
 };
 
-export function OffersList({ offers }: OffersListProps) {
+export function OffersList({ offers, showDebugInfo }: OffersListProps) {
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -207,6 +217,7 @@ export function OffersList({ offers }: OffersListProps) {
             >
               <OfferCard
                 offer={offer}
+                showDebugInfo={showDebugInfo}
                 onClick={(offer) => {
                   setSelectedOffer(offer);
                   setDrawerOpen(true);

@@ -11,6 +11,7 @@ export default function Home() {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [useMockData, setUseMockData] = useState(false);
+  const [showDebugInfo, setShowDebugInfo] = useState(false);
 
   const fetchOffers = (service: string) => {
     setIsLoading(true);
@@ -80,6 +81,19 @@ export default function Home() {
             Use Mock Data
           </Label>
         </div>
+        <div className="flex space-x-2 mb-4">
+          <Switch
+            id="show-debug-toggle"
+            checked={showDebugInfo}
+            onCheckedChange={setShowDebugInfo}
+          />
+          <Label
+            htmlFor="show-debug-toggle"
+            className="cursor-pointer select-none"
+          >
+            Show Debug Info
+          </Label>
+        </div>
         <div className="flex flex-col space-y-4">
           <div>
             <Label htmlFor="service-select" className="mb-1 block font-medium">
@@ -131,7 +145,9 @@ export default function Home() {
             </p>
           )}
 
-          {!isLoading && offers.length > 0 && <OffersList offers={offers} />}
+          {!isLoading && offers.length > 0 && (
+            <OffersList offers={offers} showDebugInfo={showDebugInfo} />
+          )}
         </section>
       </div>
     </main>
