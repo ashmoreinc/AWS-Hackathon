@@ -1,6 +1,6 @@
-"use client";
 import { z } from "zod";
 import Image from "next/image";
+import { useState } from "react";
 import {
   Carousel,
   CarouselContent,
@@ -9,7 +9,6 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
-import { mockOffers } from "./mock-data";
 import { Badge } from "@/components/ui/badge";
 import {
   Drawer,
@@ -17,10 +16,9 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { useState } from "react";
 
-// Zod schema
-const OfferSchema = z.object({
+// Reuse your existing Zod schema and Offer type (export if needed)
+export const OfferSchema = z.object({
   id: z.string(),
   name: z.string(),
   image: z.string(),
@@ -31,36 +29,25 @@ const OfferSchema = z.object({
   tags: z.array(z.string()),
   redemptionType: z.string(),
 });
+export type Offer = z.infer<typeof OfferSchema>;
 
 export function timeUntilExpiry(expiryISO: string): string {
   const now = new Date();
   const expiry = new Date(expiryISO);
-
   const diffMs = expiry.getTime() - now.getTime();
-
-  if (diffMs <= 0) {
-    return "Expired";
-  }
+  if (diffMs <= 0) return "Expired";
 
   const prefix = "Expires in ";
   const diffMinutes = Math.floor(diffMs / (1000 * 60));
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffMinutes < 60) {
+  if (diffMinutes < 60)
     return `${prefix} in ${diffMinutes} minute${diffMinutes === 1 ? "" : "s"}`;
-  }
-
-  if (diffHours < 24) {
+  if (diffHours < 24)
     return `${prefix} in ${diffHours} hour${diffHours === 1 ? "" : "s"}`;
-  }
-
   return `${prefix} in ${diffDays} day${diffDays === 1 ? "" : "s"}`;
 }
-// Mock data
-const offers = mockOffers.map((offer) => OfferSchema.parse(offer));
-
-type Offer = z.infer<typeof OfferSchema>;
 
 function OfferImage({ src, alt }: { src: string; alt: string }) {
   return (
@@ -86,16 +73,14 @@ function OfferCard({
   return (
     <Card
       onClick={() => onClick(offer)}
-      className="h-full w-full cursor-pointer flex flex-col rounded-2xl border bg-background shadow-sm transition hover:shadow-md hover:ring-1 hover:ring-muted py-0"
+      className="h-full w-full cursor-pointer flex flex-col rounded-2xl border bg-background shadow-sm transition hover:shadow-md hover:ring-1 hover:ring-muted p-0"
     >
       <OfferImage src={offer.image} alt={offer.name} />
-
       <CardContent className="flex flex-1 flex-col gap-3 p-4">
         <div className="space-y-1">
           <h2 className="text-base font-semibold leading-tight mb-2">
             {offer.name}
           </h2>
-
           <div className="flex flex-wrap gap-1 text-xs">
             <Badge variant="secondary">{offer.offerType}</Badge>
             <Badge variant="secondary">{offer.redemptionType}</Badge>
@@ -104,12 +89,10 @@ function OfferCard({
             )}
           </div>
         </div>
-
         <div className="mt-auto space-y-2">
           <p className="text-xs text-muted-foreground">
             {timeUntilExpiry(offer.expiry)}
           </p>
-
           <div className="flex flex-wrap gap-1">
             {offer.tags.map((tag) => (
               <span
@@ -136,7 +119,6 @@ function OfferDrawer({
   onOpenChange: (open: boolean) => void;
 }) {
   if (!offer) return null;
-
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="max-h-[90vh]">
@@ -152,8 +134,10 @@ function OfferDrawer({
             </div>
 
             <div className="space-y-4 text-sm">
-              <DrawerHeader className="text-4xl p-0">
-                <DrawerTitle className="text-start">{offer.name}</DrawerTitle>
+              <DrawerHeader className="px-0">
+                <DrawerTitle className="text-4xl text-start">
+                  {offer.name}
+                </DrawerTitle>
               </DrawerHeader>
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary">{offer.offerType}</Badge>
@@ -202,14 +186,16 @@ function OfferDrawer({
   );
 }
 
-export default function OffersPage() {
+export type OffersListProps = {
+  offers: Offer[];
+};
+
+export function OffersList({ offers }: OffersListProps) {
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10">
-      <h1 className="text-3xl font-semibold mb-6">Featured Offers</h1>
-
+    <div>
       <Carousel className="relative -mx-2">
         <CarouselContent className="p-4 items-stretch">
           {offers.map((offer) => (
