@@ -3,6 +3,20 @@ import { PutObjectCommand, GetObjectCommand, ListObjectsV2Command, DeleteObjectC
 import { s3Client, S3_BUCKET_NAME } from "@/lib/aws-config";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
+// Maximum file size: 5MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+// Validate S3 key format
+function isValidS3Key(key: string): boolean {
+  // Key should not contain path traversal patterns
+  if (key.includes('..') || key.startsWith('/')) {
+    return false;
+  }
+  // Key should only contain alphanumeric, hyphen, underscore, forward slash, and dot
+  const validKeyPattern = /^[a-zA-Z0-9\-_/.]+$/;
+  return validKeyPattern.test(key) && key.length <= 1024;
+}
+
 // GET - List objects or get presigned URL for an object
 export async function GET(request: NextRequest) {
   try {
@@ -10,6 +24,11 @@ export async function GET(request: NextRequest) {
     const key = searchParams.get("key");
 
     if (key) {
+      // Validate key
+      if (!isValidS3Key(key)) {
+        return NextResponse.json({ error: "Invalid object key" }, { status: 400 });
+      }
+
       // Get presigned URL for specific object
       const command = new GetObjectCommand({
         Bucket: S3_BUCKET_NAME,
@@ -20,9 +39,10 @@ export async function GET(request: NextRequest) {
       
       return NextResponse.json({ url });
     } else {
-      // List all objects in bucket
+      // List all objects in bucket with pagination
       const command = new ListObjectsV2Command({
         Bucket: S3_BUCKET_NAME,
+        MaxKeys: 100, // Limit results for performance
       });
       
       const response = await s3Client.send(command);
@@ -32,13 +52,15 @@ export async function GET(request: NextRequest) {
           key: obj.Key,
           size: obj.Size,
           lastModified: obj.LastModified,
-        })) || [] 
+        })) || [],
+        isTruncated: response.IsTruncated || false,
+        nextContinuationToken: response.NextContinuationToken
       });
     }
   } catch (error) {
     console.error("S3 GET Error:", error);
     return NextResponse.json(
-      { error: "Failed to retrieve S3 objects", details: String(error) },
+      { error: "Failed to retrieve S3 objects" },
       { status: 500 }
     );
   }
@@ -57,8 +79,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Decode base64 content if it's a string
-    const buffer = Buffer.from(content, 'base64');
+    // Validate key format
+    if (!isValidS3Key(key)) {
+      return NextResponse.json({ error: "Invalid object key format" }, { status: 400 });
+    }
+
+    // Decode base64 content and check size
+    let buffer: Buffer;
+    try {
+      buffer = Buffer.from(content, 'base64');
+    } catch {
+      return NextResponse.json({ error: "Invalid base64 content" }, { status: 400 });
+    }
+
+    // Check file size
+    if (buffer.length > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { error: `File size exceeds maximum of ${MAX_FILE_SIZE / 1024 / 1024}MB` },
+        { status: 413 }
+      );
+    }
 
     const command = new PutObjectCommand({
       Bucket: S3_BUCKET_NAME,
@@ -77,7 +117,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("S3 POST Error:", error);
     return NextResponse.json(
-      { error: "Failed to upload to S3", details: String(error) },
+      { error: "Failed to upload to S3" },
       { status: 500 }
     );
   }
@@ -91,6 +131,11 @@ export async function DELETE(request: NextRequest) {
 
     if (!key) {
       return NextResponse.json({ error: "Key is required" }, { status: 400 });
+    }
+
+    // Validate key format
+    if (!isValidS3Key(key)) {
+      return NextResponse.json({ error: "Invalid object key" }, { status: 400 });
     }
 
     const command = new DeleteObjectCommand({
@@ -107,7 +152,7 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     console.error("S3 DELETE Error:", error);
     return NextResponse.json(
-      { error: "Failed to delete from S3", details: String(error) },
+      { error: "Failed to delete from S3" },
       { status: 500 }
     );
   }

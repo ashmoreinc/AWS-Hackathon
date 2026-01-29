@@ -22,18 +22,22 @@ export async function GET(request: NextRequest) {
       
       return NextResponse.json({ item: response.Item });
     } else {
-      // Scan all items
+      // Scan all items with pagination
       const command = new ScanCommand({
         TableName: DYNAMODB_TABLE_NAME,
+        Limit: 100, // Limit results for performance
       });
       const response = await docClient.send(command);
       
-      return NextResponse.json({ items: response.Items || [] });
+      return NextResponse.json({ 
+        items: response.Items || [],
+        lastEvaluatedKey: response.LastEvaluatedKey 
+      });
     }
   } catch (error) {
     console.error("DynamoDB GET Error:", error);
     return NextResponse.json(
-      { error: "Failed to retrieve items from DynamoDB", details: String(error) },
+      { error: "Failed to retrieve items from DynamoDB" },
       { status: 500 }
     );
   }
@@ -47,6 +51,11 @@ export async function POST(request: NextRequest) {
 
     if (!id) {
       return NextResponse.json({ error: "ID is required" }, { status: 400 });
+    }
+
+    // Validate ID format
+    if (typeof id !== 'string' || id.length > 255) {
+      return NextResponse.json({ error: "Invalid ID format" }, { status: 400 });
     }
 
     const item = {
@@ -66,7 +75,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("DynamoDB POST Error:", error);
     return NextResponse.json(
-      { error: "Failed to create item in DynamoDB", details: String(error) },
+      { error: "Failed to create item in DynamoDB" },
       { status: 500 }
     );
   }
@@ -93,7 +102,7 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     console.error("DynamoDB DELETE Error:", error);
     return NextResponse.json(
-      { error: "Failed to delete item from DynamoDB", details: String(error) },
+      { error: "Failed to delete item from DynamoDB" },
       { status: 500 }
     );
   }

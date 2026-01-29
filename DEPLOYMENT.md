@@ -119,20 +119,12 @@ Visit http://localhost:3000 to test the application.
 
 If you prefer to host on AWS:
 
-```bash
-# Build the Next.js app
-npm run build
+**Note**: This application requires a Node.js runtime for API routes. Consider using:
+- AWS Amplify with SSR support
+- Docker containers on ECS/Fargate
+- AWS App Runner
 
-# Export static files (if using static export)
-npm run export  # Add this script to package.json if needed
-
-# Upload to S3
-aws s3 sync out/ s3://your-static-bucket-name/
-
-# Get CloudFront URL
-cd ../terraform
-terraform output cloudfront_domain_name
-```
+Static site deployment to S3 is not suitable for this project as it uses API routes.
 
 ## Testing the Deployment
 

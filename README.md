@@ -2,6 +2,17 @@
 
 A modern Next.js application with TypeScript, Tailwind CSS, and AWS integration (DynamoDB and S3), including complete Terraform infrastructure configuration for AWS deployment.
 
+## ⚠️ Security Notice
+
+**IMPORTANT**: This is a demonstration project. The API routes do not include authentication or authorization. Before deploying to production:
+
+- Implement authentication (e.g., NextAuth.js, AWS Cognito, Auth0)
+- Add authorization checks to all API routes
+- Use IAM roles instead of access keys when possible
+- Never expose AWS credentials in client-side code
+- Review and implement proper CORS policies
+- Add rate limiting to prevent abuse
+
 ## 🚀 Features
 
 - **Next.js 16** with App Router
@@ -221,7 +232,9 @@ The main page provides an interactive UI with:
 
 ## 🚀 Deployment Options
 
-### Option 1: Vercel (Recommended for Next.js)
+### Option 1: Vercel (Recommended)
+
+Vercel is the recommended deployment platform for Next.js applications with API routes.
 
 1. Push your code to GitHub
 2. Import project in Vercel
@@ -231,14 +244,19 @@ The main page provides an interactive UI with:
 ### Option 2: AWS Amplify
 
 1. Build the Next.js app: `npm run build`
-2. Deploy to Amplify Console
+2. Deploy to Amplify Console with SSR support
 3. Configure environment variables
 
-### Option 3: Static Export to S3
+### Option 3: Docker + AWS ECS/Fargate
 
-1. Export Next.js as static site (if no dynamic features needed)
-2. Upload to S3 static website bucket
-3. Access via CloudFront URL
+For full control over the deployment:
+
+1. Create a Dockerfile for the Next.js app
+2. Build and push to Amazon ECR
+3. Deploy using ECS or Fargate
+4. Use IAM roles for AWS service access (no access keys needed)
+
+**Note**: This application uses API routes that require a Node.js runtime. Static site export is not suitable for this project.
 
 ## 📊 Monitoring and Logging
 

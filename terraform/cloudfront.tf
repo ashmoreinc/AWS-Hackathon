@@ -64,7 +64,7 @@ resource "aws_cloudfront_distribution" "app_distribution" {
   }
 }
 
-# Update S3 bucket policy for CloudFront access
+# S3 bucket policy for CloudFront OAI access only
 resource "aws_s3_bucket_policy" "cloudfront_access" {
   bucket = aws_s3_bucket.static_website.id
 
@@ -79,13 +79,6 @@ resource "aws_s3_bucket_policy" "cloudfront_access" {
         }
         Action   = "s3:GetObject"
         Resource = "${aws_s3_bucket.static_website.arn}/*"
-      },
-      {
-        Sid       = "PublicReadGetObject"
-        Effect    = "Allow"
-        Principal = "*"
-        Action    = "s3:GetObject"
-        Resource  = "${aws_s3_bucket.static_website.arn}/*"
       }
     ]
   })
