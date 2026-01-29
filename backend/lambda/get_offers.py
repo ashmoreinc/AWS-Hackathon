@@ -1,53 +1,16 @@
 import json
 import boto3
 import os
-from datetime import datetime, timedelta
 from decimal import Decimal
 
 dynamodb = boto3.resource('dynamodb')
-user_table = dynamodb.Table(os.environ['USER_ACTIVITY_TABLE'])
+offers_table = dynamodb.Table(os.environ['OFFERS_TABLE'])
+user_table = dynamodb.Table(os.environ.get('USER_ACTIVITY_TABLE', 'UserActivity'))
 
-# Load offers and users data
-with open('offers.json', 'r') as f:
-    OFFERS = json.load(f)
-
-with open('users.json', 'r') as f:
-    USERS = {user['user_id']: user for user in json.load(f)}
-
-def calculate_score(offer, connection_type):
-    score = 0.0
-    
-    # Rule 1: wifi + online = +1
-    if connection_type == 'wifi' and offer.get('offerType') == 'online':
-        score += 1
-    
-    # Rule 2: mobile + not online = +1
-    if connection_type == 'mobile' and offer.get('offerType') != 'online':
-        score += 1
-    
-    # Rule 3: boost = +1
-    if offer.get('boost', False):
-        score += 1
-    
-    # Rule 4: expiry < 2 weeks - interleaved 0-1 score
-    expiry_str = offer.get('expiry')
-    if expiry_str:
-        try:
-            expiry_date = datetime.fromisoformat(expiry_str.replace('Z', '+00:00'))
-            now = datetime.now(expiry_date.tzinfo)
-            days_left = (expiry_date - now).days
-            
-            if days_left < 14:
-                # Interleave: 14 days = 1.0, 0 days = 0.0
-                score += max(0, min(1, days_left / 14))
-        except:
-            pass
-    
-    # Rule 5: commission - interleaved 0-1 score (5 = 1.0, 0 = 0.0)
-    commission = offer.get('commission', 0)
-    score += commission / 5.0
-    
-    return round(score, 2)
+def decimal_default(obj):
+    if isinstance(obj, Decimal):
+        return float(obj)
+    raise TypeError
 
 def lambda_handler(event, context):
     try:
@@ -55,27 +18,54 @@ def lambda_handler(event, context):
         user_id = body.get('user_id')
         connection_type = body.get('connection_type')
         
-        if not user_id or not connection_type:
+        if not user_id:
             return {
                 'statusCode': 400,
                 'body': json.dumps({'error': 'user_id required'})
             }
         
-        # Get user connection type
-        user = USERS.get(user_id, {})
+        # Get user profile if connection_type not provided
+        if not connection_type:
+            try:
+                user_response = user_table.get_item(Key={'PK': f'USER#{user_id}', 'SK': 'PROFILE'})
+                user_profile = user_response.get('Item', {})
+                connection_type = user_profile.get('connection_type', 'mobile')
+            except:
+                connection_type = 'mobile'
         
-        # Calculate scores for all offers
+        # Determine preferred offer type
+        preferred_type = 'online' if connection_type == 'wifi' else 'high_street'
+        
+        # Get all active offers
+        offers_response = offers_table.scan(
+            FilterExpression='#status = :active AND inventory_count > :zero',
+            ExpressionAttributeNames={'#status': 'status'},
+            ExpressionAttributeValues={':active': 'ACTIVE', ':zero': 0}
+        )
+        
+        offers = offers_response.get('Items', [])
+        
+        # Score offers
         scored_offers = []
-        for offer in OFFERS:
-            score = calculate_score(offer, connection_type)
+        for offer in offers:
+            base_score = float(offer.get('priority', 50))
+            type_boost = 50 if offer.get('offer_type') == preferred_type else 0
+            total_score = base_score + type_boost
+            
             scored_offers.append({
-                'offer': offer,
-                'score': score
+                'offer_id': offer.get('offer_id'),
+                'offer_name': offer.get('offer_name'),
+                'offer_type': offer.get('offer_type'),
+                'discount_type': offer.get('discount_type'),
+                'discount_value': float(offer.get('discount_value', 0)),
+                'priority': float(offer.get('priority', 0)),
+                'inventory_count': int(offer.get('inventory_count', 0)),
+                'score': round(total_score, 2)
             })
         
-        # Sort by score descending and take top 20
+        # Sort and return top 3
         scored_offers.sort(key=lambda x: x['score'], reverse=True)
-        top_offers = scored_offers[:20]
+        top_offers = scored_offers[:3]
         
         return {
             'statusCode': 200,
@@ -83,11 +73,10 @@ def lambda_handler(event, context):
             'body': json.dumps({
                 'user_id': user_id,
                 'connection_type': connection_type,
-                'offers': [{
-                    'offer': item['offer'],
-                    'score': item['score']
-                } for item in top_offers]
-            })
+                'preferred_offer_type': preferred_type,
+                'recommended_offers': top_offers,
+                'total_available': len(offers)
+            }, default=decimal_default)
         }
         
     except Exception as e:
