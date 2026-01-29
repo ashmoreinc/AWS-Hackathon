@@ -64,22 +64,43 @@ resource "aws_cloudfront_distribution" "app_distribution" {
   }
 }
 
-# S3 bucket policy for CloudFront OAI access only
+# S3 bucket policy for CloudFront OAI and deployer access
 resource "aws_s3_bucket_policy" "cloudfront_access" {
   bucket = aws_s3_bucket.static_website.id
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
-      {
-        Sid    = "CloudFrontAccess"
-        Effect = "Allow"
-        Principal = {
-          AWS = aws_cloudfront_origin_access_identity.oai.iam_arn
+    Statement = concat(
+      [
+        {
+          Sid    = "CloudFrontAccess"
+          Effect = "Allow"
+          Principal = {
+            AWS = aws_cloudfront_origin_access_identity.oai.iam_arn
+          }
+          Action   = "s3:GetObject"
+          Resource = "${aws_s3_bucket.static_website.arn}/*"
         }
-        Action   = "s3:GetObject"
-        Resource = "${aws_s3_bucket.static_website.arn}/*"
-      }
-    ]
+      ],
+      length(var.deployer_role_arns) > 0 ? [
+        {
+          Sid    = "DeployerAccess"
+          Effect = "Allow"
+          Principal = {
+            AWS = var.deployer_role_arns
+          }
+          Action = [
+            "s3:GetObject",
+            "s3:PutObject",
+            "s3:DeleteObject",
+            "s3:ListBucket"
+          ]
+          Resource = [
+            aws_s3_bucket.static_website.arn,
+            "${aws_s3_bucket.static_website.arn}/*"
+          ]
+        }
+      ] : []
+    )
   })
 }

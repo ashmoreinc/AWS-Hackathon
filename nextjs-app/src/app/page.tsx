@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Offer, OffersList } from "@/components/offer-list/offer-list";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 import { mockOffers } from "./mock-data";
 
 export default function Home() {
@@ -118,9 +119,10 @@ export default function Home() {
           <h2 className="text-xl font-semibold mb-4">Your Offers</h2>
 
           {isLoading && (
-            <p className="text-center text-muted-foreground">
-              Loading offers...
-            </p>
+            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+              <Spinner size="lg" />
+              <p className="text-muted-foreground">Loading offers...</p>
+            </div>
           )}
 
           {!isLoading && offers.length === 0 && (

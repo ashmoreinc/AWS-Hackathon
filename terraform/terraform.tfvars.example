@@ -12,3 +12,7 @@ environment = "dev"
 
 # Optional: Custom domain name for CloudFront
 # domain_name = "yourdomain.com"
+
+# IAM role ARNs that can deploy to the static website S3 bucket
+# Add your SSO role ARN here to allow deployment
+# deployer_role_arns = ["arn:aws:iam::123456789012:role/AWSReservedSSO_DeveloperAdministratorAccess_xxxx"]

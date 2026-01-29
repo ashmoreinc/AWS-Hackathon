@@ -1,13 +1,13 @@
 variable "aws_region" {
   description = "AWS region to deploy resources"
   type        = string
-  default     = "us-east-1"
+  default     = "eu-west-2"
 }
 
 variable "project_name" {
   description = "Project name for resource naming"
   type        = string
-  default     = "hackathon"
+  default     = "team3-hackathon"
 }
 
 variable "environment" {
@@ -20,4 +20,10 @@ variable "domain_name" {
   description = "Optional custom domain name"
   type        = string
   default     = ""
+}
+
+variable "deployer_role_arns" {
+  description = "List of IAM role ARNs that can deploy to the static website bucket"
+  type        = list(string)
+  default     = []
 }

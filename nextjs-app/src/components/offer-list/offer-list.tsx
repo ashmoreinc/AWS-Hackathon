@@ -1,3 +1,5 @@
+"use client"
+
 import { z } from "zod";
 import Image from "next/image";
 import { useState } from "react";
