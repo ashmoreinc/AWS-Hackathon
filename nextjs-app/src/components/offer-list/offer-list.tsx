@@ -73,7 +73,7 @@ function OfferCard({
   return (
     <Card
       onClick={() => onClick(offer)}
-      className="h-full w-full cursor-pointer flex flex-col rounded-2xl border bg-background shadow-sm transition hover:shadow-md hover:ring-1 hover:ring-muted"
+      className="h-full w-full cursor-pointer flex flex-col rounded-2xl border bg-background shadow-sm transition hover:shadow-md hover:ring-1 hover:ring-muted p-0"
     >
       <OfferImage src={offer.image} alt={offer.name} />
       <CardContent className="flex flex-1 flex-col gap-3 p-4">

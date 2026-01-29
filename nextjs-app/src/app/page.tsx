@@ -1,22 +1,18 @@
 "use client";
 
-import { OffersList } from "@/components/offer-list/offer-list";
-import { off } from "process";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Offer, OffersList } from "@/components/offer-list/offer-list";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { mockOffers } from "./offers/mock-data";
 
 export default function Home() {
-  const [offers, setOffers] = useState([]);
+  const [offers, setOffers] = useState<Offer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const onUserChange = () => {
-    const service = (
-      document.getElementById("service-select") as HTMLSelectElement
-    ).value;
-    const hour = parseInt(
-      (document.getElementById("hour-input") as HTMLInputElement).value,
-    );
+  const [useMockData, setUseMockData] = useState(false);
 
+  const fetchOffers = (service: string) => {
     setIsLoading(true);
-    // Fetch offers based on user input
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/offers/recommend`, {
       method: "POST",
       headers: {
@@ -31,51 +27,111 @@ export default function Home() {
       .then((data) => {
         setOffers(data?.recommended_offers || []);
         setIsLoading(false);
+      })
+      .catch(() => {
+        setOffers([]);
+        setIsLoading(false);
       });
   };
 
+  // inside Home component, add this effect:
+  useEffect(() => {
+    if (useMockData) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setOffers(mockOffers);
+      setIsLoading(false);
+    } else {
+      // refetch using the current selected network
+      const serviceSelect = document.getElementById(
+        "service-select",
+      ) as HTMLSelectElement | null;
+      const service = serviceSelect?.value || "wifi";
+      fetchOffers(service);
+    }
+  }, [useMockData]);
+
+  const onUserChange = () => {
+    if (useMockData) return; // Skip fetch if using mock data
+    const service = (
+      document.getElementById("service-select") as HTMLSelectElement
+    ).value;
+    fetchOffers(service);
+  };
+
   return (
-    <div>
-      <main className="flex flex-col">
-        <h1 className="font-bold mx-auto">AWS Hackathon Demo</h1>
-        <div className="mx-auto w-full grid grid-cols-2 gap-4">
-          <div className="p-4 rounded-lg shadow-md">
-            <h1>Your offers</h1>
-            {isLoading && <p>Loading offers...</p>}
-            {offers.length > 0 ? (
-              <OffersList offers={offers} />
-            ) : (
-              <p>
-                No offers available. Please select your network type and hour.
-              </p>
-            )}
+    <main className="flex flex-col max-w-7xl mx-auto p-6 space-y-8">
+      <h1 className="text-3xl font-bold text-center">AWS Hackathon Demo</h1>
+
+      {/* User Input Section */}
+      <section className="p-6 rounded-lg shadow-md bg-gray-50 w-2/5">
+        <h2 className="text-xl font-semibold mb-4">Who are you?</h2>
+
+        <div className="flex space-x-2 mb-4">
+          <Switch
+            id="use-mock-toggle"
+            checked={useMockData}
+            onCheckedChange={setUseMockData}
+          />
+          <Label
+            htmlFor="use-mock-toggle"
+            className="cursor-pointer select-none"
+          >
+            Use Mock Data
+          </Label>
+        </div>
+        <div className="flex flex-col space-y-4">
+          <div>
+            <Label htmlFor="service-select" className="mb-1 block font-medium">
+              Choose your network type:
+            </Label>
+            <select
+              id="service-select"
+              className="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={onUserChange}
+              defaultValue="wifi"
+            >
+              <option value="wifi">WiFi</option>
+              <option value="mobile">Mobile Network</option>
+            </select>
           </div>
-          <div className="flex flex-col items-center bg-gray-800 white bg-opacity-10 p-4 rounded-lg shadow-md">
-            <h1>Who are you?</h1>
-            <div>
-              <label htmlFor="service-select">
-                Choose a your network type:
-              </label>
-              <select id="service-select" onChange={onUserChange}>
-                <option value="wifi">WiFi</option>
-                <option value="mobile">Mobile Network</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="hour-input">What hour is it?</label>
-              <input
-                className="w-24"
-                name="Hour"
-                id="hour-input"
-                type="number"
-                min="0"
-                max="23"
-                onChange={onUserChange}
-              />
-            </div>
+
+          <div>
+            <Label htmlFor="hour-input" className="mb-1 block font-medium">
+              What hour is it? (0–23)
+            </Label>
+            <input
+              id="hour-input"
+              type="number"
+              min={0}
+              max={23}
+              className="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={onUserChange}
+              placeholder="Enter hour"
+            />
           </div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      <div className="gap-8 mx-2">
+        {/* Offers Section */}
+        <section className="">
+          <h2 className="text-xl font-semibold mb-4">Your Offers</h2>
+
+          {isLoading && (
+            <p className="text-center text-muted-foreground">
+              Loading offers...
+            </p>
+          )}
+
+          {!isLoading && offers.length === 0 && (
+            <p className="text-center text-muted-foreground">
+              No offers available. Please select your network type.
+            </p>
+          )}
+
+          {!isLoading && offers.length > 0 && <OffersList offers={offers} />}
+        </section>
+      </div>
+    </main>
   );
 }
