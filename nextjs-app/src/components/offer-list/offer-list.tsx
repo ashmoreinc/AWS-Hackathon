@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { z } from "zod";
 import Image from "next/image";
@@ -98,16 +98,6 @@ function OfferCard({
           <p className="text-xs text-muted-foreground">
             {timeUntilExpiry(offer.expiry)}
           </p>
-          <div className="flex flex-wrap gap-1">
-            {offer.tags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground"
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
         </div>
         {showDebugInfo ? (
           <div className="space-y-1 text-sm text-muted-foreground">
@@ -173,22 +163,6 @@ function OfferDrawer({
                   {timeUntilExpiry(offer.expiry)}
                 </p>
               </div>
-
-              {offer.tags.length > 0 ? (
-                <div>
-                  <p className="font-medium mb-1">Tags</p>
-                  <div className="flex flex-wrap gap-1">
-                    {offer.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
             </div>
           </div>
         </div>
