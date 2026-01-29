@@ -14,8 +14,9 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 import { Check } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
-function UserIdSelect({
+function UserIdPills({
   userIds,
   selectedUserId,
   onChange,
@@ -24,49 +25,27 @@ function UserIdSelect({
   selectedUserId: string | null;
   onChange: (userId: string) => void;
 }) {
-  const [search, setSearch] = useState("");
-
-  // Filter user IDs by search term (case-insensitive)
-  const filteredUserIds = userIds.filter((id) =>
-    id.toLowerCase().includes(search.toLowerCase()),
-  );
-
-  // Only show items if input is not empty
-  const showItems = search.trim().length > 0;
-
   return (
     <div className="mb-4">
-      <label htmlFor="user-id-select" className="mb-1 block font-medium">
-        Select User ID
-      </label>
-      <Command>
-        <CommandInput
-          placeholder="Search user ID..."
-          value={search}
-          onValueChange={setSearch}
-        />
-        <CommandGroup>
-          {showItems && filteredUserIds.length === 0 && (
-            <CommandEmpty>No users found.</CommandEmpty>
-          )}
-          {showItems &&
-            filteredUserIds.map((userId) => (
-              <CommandItem
-                key={userId}
-                onSelect={() => {
-                  onChange(userId);
-                  setSearch(""); // optional: clear search on select
-                }}
-                className="flex items-center justify-between"
-              >
-                {userId}
-                {selectedUserId === userId && (
-                  <Check className="ml-2 h-4 w-4 text-blue-600" />
-                )}
-              </CommandItem>
-            ))}
-        </CommandGroup>
-      </Command>
+      <label className="mb-2 block font-medium">Select User ID</label>
+      <div className="flex flex-wrap gap-2">
+        {userIds.map((userId) => {
+          const isSelected = userId === selectedUserId;
+          return (
+            <Badge
+              key={userId}
+              onClick={() => onChange(userId)}
+              className={`cursor-pointer select-none ${
+                isSelected
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              {userId}
+            </Badge>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -79,7 +58,7 @@ export default function Home() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(
     "USER001",
   );
-  const mockUserIds = ["USER001", "USER002", "USER003", "ALICE", "BOB"];
+  const mockUserIds = ["USER001", "USER002", "USER003"];
 
   const fetchOffers = (service: string, time?: string) => {
     setIsLoading(true);
@@ -182,7 +161,7 @@ export default function Home() {
           </div>
         </div>
         <div className="flex flex-col space-y-4">
-          <UserIdSelect
+          <UserIdPills
             userIds={mockUserIds}
             selectedUserId={selectedUserId}
             onChange={setSelectedUserId}
