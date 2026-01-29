@@ -1,0 +1,540 @@
+{
+  "info": {
+    "name": "Business Rules Test Suite",
+    "description": "Complete test suite for all business rules scenarios",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://5dli9gdwdk.execute-api.us-east-1.amazonaws.com/prod",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Rule 1: Connection-Based Targeting",
+      "item": [
+        {
+          "name": "Test 1.1: WiFi → Online Priority",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER001\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/offers/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["offers", "recommend"]
+            },
+            "description": "Expected: Top 3 online offers (Amazon 145, ASOS 138, Deliveroo 142)"
+          },
+          "response": []
+        },
+        {
+          "name": "Test 1.2: Mobile → High Street Priority",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER002\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/offers/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["offers", "recommend"]
+            },
+            "description": "Expected: Top 3 high street offers (Starbucks 140, Tesco 135, Costa 130)"
+          },
+          "response": []
+        },
+        {
+          "name": "Test 1.3: Verify +50 Boost Applied",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER001\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/offers/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["offers", "recommend"]
+            },
+            "description": "Check response: Amazon (priority 95) should have score 145 (95+50)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Example 1: WiFi User Scenario",
+      "item": [
+        {
+          "name": "Get Offers for USER001 (WiFi)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER001\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/offers/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["offers", "recommend"]
+            },
+            "description": "Expected Results:\n1. Amazon Prime (online, 95) → 145 ✓\n2. ASOS Sale (online, 88) → 138 ✓\n3. Deliveroo (online, 92) → 142 ✓\n\nNot shown:\n- Starbucks (high_street, 90) → 90\n- Tesco (high_street, 85) → 85"
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Amazon Prime is First",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Returns 3 offers\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.recommended_offers).to.have.lengthOf(3);",
+                  "});",
+                  "",
+                  "pm.test(\"First offer is online type\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.recommended_offers[0].offer_type).to.eql(\"online\");",
+                  "});",
+                  "",
+                  "pm.test(\"Connection type is wifi\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.connection_type).to.eql(\"wifi\");",
+                  "});",
+                  "",
+                  "pm.test(\"Preferred offer type is online\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.preferred_offer_type).to.eql(\"online\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER001\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/offers/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["offers", "recommend"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Example 2: Mobile User Scenario",
+      "item": [
+        {
+          "name": "Get Offers for USER002 (Mobile)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER002\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/offers/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["offers", "recommend"]
+            },
+            "description": "Expected Results:\n1. Starbucks (high_street, 90) → 140 ✓\n2. Tesco (high_street, 85) → 135 ✓\n3. Costa (high_street, 80) → 130 ✓\n\nNot shown:\n- Amazon Prime (online, 95) → 95"
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Starbucks is First",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"First offer is high_street type\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.recommended_offers[0].offer_type).to.eql(\"high_street\");",
+                  "});",
+                  "",
+                  "pm.test(\"Connection type is mobile\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.connection_type).to.eql(\"mobile\");",
+                  "});",
+                  "",
+                  "pm.test(\"Preferred offer type is high_street\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.preferred_offer_type).to.eql(\"high_street\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER002\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/offers/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["offers", "recommend"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Rule 10: Connection Type Override",
+      "item": [
+        {
+          "name": "Test 10.1: Override WiFi User to Mobile",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER001\",\n  \"connection_type\": \"mobile\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/offers/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["offers", "recommend"]
+            },
+            "description": "USER001 normally has WiFi, but override to mobile\nExpected: High street offers shown instead"
+          },
+          "response": []
+        },
+        {
+          "name": "Test 10.2: Override Mobile User to WiFi",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER002\",\n  \"connection_type\": \"wifi\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/offers/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["offers", "recommend"]
+            },
+            "description": "USER002 normally has mobile, but override to wifi\nExpected: Online offers shown instead"
+          },
+          "response": []
+        },
+        {
+          "name": "Test 10.3: Verify Override Works",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Override applied\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.connection_type).to.eql(\"mobile\");",
+                  "    pm.expect(jsonData.preferred_offer_type).to.eql(\"high_street\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER001\",\n  \"connection_type\": \"mobile\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/offers/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["offers", "recommend"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Rule 11: Response Format",
+      "item": [
+        {
+          "name": "Test 11.1: Verify Response Structure",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Response has required fields\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('user_id');",
+                  "    pm.expect(jsonData).to.have.property('connection_type');",
+                  "    pm.expect(jsonData).to.have.property('preferred_offer_type');",
+                  "    pm.expect(jsonData).to.have.property('recommended_offers');",
+                  "    pm.expect(jsonData).to.have.property('total_available');",
+                  "});",
+                  "",
+                  "pm.test(\"Returns exactly 3 offers\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.recommended_offers).to.have.lengthOf(3);",
+                  "});",
+                  "",
+                  "pm.test(\"Offers are sorted by score\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    var offers = jsonData.recommended_offers;",
+                  "    for (var i = 0; i < offers.length - 1; i++) {",
+                  "        pm.expect(offers[i].score).to.be.at.least(offers[i + 1].score);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER001\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/offers/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["offers", "recommend"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Rule 13: Activity History",
+      "item": [
+        {
+          "name": "Test 13.1: Track Click Event",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER001\",\n  \"offer_id\": \"OFF002\",\n  \"offer_type\": \"online\",\n  \"event_type\": \"CLICK\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/events/track",
+              "host": ["{{base_url}}"],
+              "path": ["events", "track"]
+            },
+            "description": "Event stored in DynamoDB and Kinesis for analytics"
+          },
+          "response": []
+        },
+        {
+          "name": "Test 13.2: Track View Event",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER002\",\n  \"offer_id\": \"OFF001\",\n  \"offer_type\": \"high_street\",\n  \"event_type\": \"VIEW\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/events/track",
+              "host": ["{{base_url}}"],
+              "path": ["events", "track"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test 13.3: Track Redemption",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER001\",\n  \"offer_id\": \"OFF002\",\n  \"offer_type\": \"online\",\n  \"event_type\": \"REDEMPTION\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/events/track",
+              "host": ["{{base_url}}"],
+              "path": ["events", "track"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test 13.4: Track Add to Cart",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER003\",\n  \"offer_id\": \"OFF004\",\n  \"offer_type\": \"online\",\n  \"event_type\": \"ADD_TO_CART\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/events/track",
+              "host": ["{{base_url}}"],
+              "path": ["events", "track"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test 13.5: Track Dismiss",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER002\",\n  \"offer_id\": \"OFF005\",\n  \"offer_type\": \"high_street\",\n  \"event_type\": \"DISMISS\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/events/track",
+              "host": ["{{base_url}}"],
+              "path": ["events", "track"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Rule 14: Offer Limits",
+      "item": [
+        {
+          "name": "Test 14.1: Verify Max 3 Offers Returned",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Returns exactly 3 offers\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.recommended_offers.length).to.be.at.most(3);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER001\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/offers/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["offers", "recommend"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Edge Cases",
+      "item": [
+        {
+          "name": "Test: Missing user_id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Returns 400 error\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/offers/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["offers", "recommend"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test: Invalid connection_type",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER001\",\n  \"connection_type\": \"invalid\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/offers/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["offers", "recommend"]
+            },
+            "description": "Should default to treating as mobile or wifi"
+          },
+          "response": []
+        },
+        {
+          "name": "Test: Non-existent user",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"USER999\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/offers/recommend",
+              "host": ["{{base_url}}"],
+              "path": ["offers", "recommend"]
+            },
+            "description": "Should default to mobile connection type"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
