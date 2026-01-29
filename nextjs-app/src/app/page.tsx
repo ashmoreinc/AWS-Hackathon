@@ -8,12 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { mockOffers } from "./mock-data";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogClose,
-} from "@/components/ui/dialog";
+import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 
 function UserIdPills({
   userIds,
@@ -134,7 +129,7 @@ export default function Home() {
             />
           </DialogTrigger>
 
-          <DialogContent className="p-8">
+          <DialogContent className="p-16">
             <Image
               src="/VisitMeImage.png"
               alt="Visit Me"
