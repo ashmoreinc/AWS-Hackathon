@@ -140,7 +140,7 @@ export default function Home() {
       <section className="p-6 rounded-lg shadow-md bg-gray-50">
         <h2 className="text-xl font-semibold mb-4">User configuration</h2>
 
-        <div className="flex gap-5">
+        <div className="flex flex-col md:flex-row md:gap-5">
           <div className="flex space-x-2 mb-4">
             <Switch
               id="use-mock-toggle"
@@ -175,7 +175,7 @@ export default function Home() {
             onChange={setSelectedUserId}
           />
         </div>
-        <div className="flex gap-5">
+        <div className="flex flex-col md:flex-row gap-5">
           <div>
             <Label htmlFor="service-select" className="mb-1 block font-medium">
               Choose your network type:
