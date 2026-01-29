@@ -25,7 +25,7 @@ export default function Home() {
     })
       .then((response) => response.json())
       .then((data) => {
-        setOffers(data?.recommended_offers || []);
+        setOffers(data?.offers || []);
         setIsLoading(false);
       })
       .catch(() => {
