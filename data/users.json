@@ -1,0 +1,14 @@
+[
+    {
+        "user_id": "USER001",
+        "connection_type": "wifi"
+    },
+    {
+        "user_id": "USER002",
+        "connection_type": "mobile"
+    },
+    {
+        "user_id": "USER003",
+        "connection_type": "wifi"
+    }
+]

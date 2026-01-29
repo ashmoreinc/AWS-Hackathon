@@ -12,42 +12,9 @@ provider "aws" {
   profile = "AdministratorAccess-851311377237"
 }
 
-resource "aws_dynamodb_table" "offers" {
-  name           = "Offers"
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "PK"
-  range_key      = "SK"
 
-  attribute {
-    name = "PK"
-    type = "S"
-  }
-  attribute {
-    name = "SK"
-    type = "S"
-  }
 
-  ttl {
-    enabled        = true
-    attribute_name = "expiration_timestamp"
-  }
-}
 
-resource "aws_dynamodb_table" "user_activity" {
-  name           = "UserActivity"
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "PK"
-  range_key      = "SK"
-
-  attribute {
-    name = "PK"
-    type = "S"
-  }
-  attribute {
-    name = "SK"
-    type = "S"
-  }
-}
 
 resource "aws_kinesis_stream" "offer_engagement" {
   name             = "offer-engagement-stream"
@@ -78,22 +45,11 @@ resource "aws_iam_role_policy" "lambda_policy" {
     Statement = [
       {
         Effect = "Allow"
-        Action = ["dynamodb:*"]
-        Resource = [
-          aws_dynamodb_table.offers.arn,
-          aws_dynamodb_table.user_activity.arn,
-          "${aws_dynamodb_table.offers.arn}/*",
-          "${aws_dynamodb_table.user_activity.arn}/*"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
         ]
-      },
-      {
-        Effect = "Allow"
-        Action = ["kinesis:*"]
-        Resource = aws_kinesis_stream.offer_engagement.arn
-      },
-      {
-        Effect = "Allow"
-        Action = ["logs:*"]
         Resource = "*"
       }
     ]
@@ -107,35 +63,13 @@ resource "aws_lambda_function" "get_offers" {
   handler         = "get_offers.lambda_handler"
   runtime         = "python3.11"
   timeout         = 30
-  memory_size     = 512
-  source_code_hash = filebase64sha256("../lambda/deployment.zip")
-
-  environment {
-    variables = {
-      OFFERS_TABLE = aws_dynamodb_table.offers.name
-      USER_ACTIVITY_TABLE = aws_dynamodb_table.user_activity.name
-      KINESIS_STREAM = aws_kinesis_stream.offer_engagement.name
-    }
-  }
-}
-
-resource "aws_lambda_function" "track_event" {
-  filename         = "../lambda/deployment.zip"
-  function_name    = "offer-track-event"
-  role            = aws_iam_role.lambda_role.arn
-  handler         = "track_event.lambda_handler"
-  runtime         = "python3.11"
-  timeout         = 10
   memory_size     = 256
   source_code_hash = filebase64sha256("../lambda/deployment.zip")
 
-  environment {
-    variables = {
-      KINESIS_STREAM = aws_kinesis_stream.offer_engagement.name
-      USER_ACTIVITY_TABLE = aws_dynamodb_table.user_activity.name
-    }
-  }
+
 }
+
+
 
 
 resource "aws_apigatewayv2_api" "offer_api" {
@@ -162,12 +96,7 @@ resource "aws_apigatewayv2_integration" "get_offers" {
   payload_format_version = "2.0"
 }
 
-resource "aws_apigatewayv2_integration" "track_event" {
-  api_id           = aws_apigatewayv2_api.offer_api.id
-  integration_type = "AWS_PROXY"
-  integration_uri  = aws_lambda_function.track_event.invoke_arn
-  payload_format_version = "2.0"
-}
+
 
 resource "aws_apigatewayv2_route" "get_offers" {
   api_id    = aws_apigatewayv2_api.offer_api.id
@@ -175,11 +104,7 @@ resource "aws_apigatewayv2_route" "get_offers" {
   target    = "integrations/${aws_apigatewayv2_integration.get_offers.id}"
 }
 
-resource "aws_apigatewayv2_route" "track_event" {
-  api_id    = aws_apigatewayv2_api.offer_api.id
-  route_key = "POST /events/track"
-  target    = "integrations/${aws_apigatewayv2_integration.track_event.id}"
-}
+
 
 resource "aws_lambda_permission" "api_gateway_get_offers" {
   statement_id  = "AllowAPIGatewayInvoke"
@@ -189,13 +114,7 @@ resource "aws_lambda_permission" "api_gateway_get_offers" {
   source_arn    = "${aws_apigatewayv2_api.offer_api.execution_arn}/*/*"
 }
 
-resource "aws_lambda_permission" "api_gateway_track_event" {
-  statement_id  = "AllowAPIGatewayInvoke"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.track_event.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.offer_api.execution_arn}/*/*"
-}
+
 
 output "api_endpoint" {
   value = aws_apigatewayv2_stage.prod.invoke_url

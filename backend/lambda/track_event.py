@@ -15,7 +15,6 @@ def lambda_handler(event, context):
         user_id = body.get('user_id')
         offer_id = body.get('offer_id')
         event_type = body.get('event_type', 'CLICK')
-        offer_type = body.get('offer_type')  # 'high_street' or 'online'
         
         if not all([user_id, offer_id]):
             return {
@@ -26,26 +25,24 @@ def lambda_handler(event, context):
         timestamp = int(time.time())
         event_id = str(uuid.uuid4())
         
-        # Store in DynamoDB
+        # Store in DynamoDB for indefinite retention
         user_table.put_item(Item={
-            'PK': f'USER#{user_id}',
-            'SK': f'ACTIVITY#{timestamp}#{event_type}#{event_id}',
-            'activity_type': event_type,
+            'user_id': user_id,
             'timestamp': timestamp,
+            'event_id': event_id,
             'offer_id': offer_id,
-            'offer_type': offer_type,
             'event_type': event_type
         })
         
-        # Send to Kinesis
+        # Send to Kinesis for real-time processing (24h retention)
         kinesis.put_record(
             StreamName=os.environ['KINESIS_STREAM'],
             Data=json.dumps({
                 'user_id': user_id,
                 'offer_id': offer_id,
-                'offer_type': offer_type,
                 'event_type': event_type,
-                'timestamp': timestamp
+                'timestamp': timestamp,
+                'event_id': event_id
             }),
             PartitionKey=user_id
         )

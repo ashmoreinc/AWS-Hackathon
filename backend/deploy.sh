@@ -5,10 +5,20 @@ set -e
 echo "🚀 Deploying Offer Management System to AWS"
 echo "============================================"
 
-# Package Lambda functions
+# Package Lambda functions with data files
 echo "📦 Packaging Lambda functions..."
 cd lambda
-zip -q deployment.zip get_offers.py track_event.py inventory_monitor.py
+
+# Copy data files to lambda directory
+cp ../../data/offers.json .
+cp ../../data/users.json .
+
+# Create deployment package
+zip -q deployment.zip get_offers.py track_event.py offers.json users.json
+
+# Clean up copied files
+rm offers.json users.json
+
 echo "✓ Lambda package created"
 
 # Initialize Terraform
