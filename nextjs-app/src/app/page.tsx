@@ -60,7 +60,7 @@ export default function Home() {
 
   return (
     <main className="flex flex-col max-w-7xl mx-auto p-6 space-y-8">
-      <h1 className="text-3xl font-bold text-center">AWS Hackathon Demo</h1>
+      <h1 className="text-5xl font-bold">AWS Hackathon Demo - Team Rotom</h1>
 
       {/* User Input Section */}
       <section className="p-6 rounded-lg shadow-md bg-gray-50 w-2/5">
