@@ -37,3 +37,25 @@ output "static_website_bucket_name" {
   description = "Name of the S3 bucket for static website hosting"
   value       = aws_s3_bucket.static_website.id
 }
+
+# API Gateway outputs
+output "api_gateway_id" {
+  description = "ID of the API Gateway"
+  value       = aws_apigatewayv2_api.api.id
+}
+
+output "api_gateway_endpoint" {
+  description = "API Gateway endpoint URL"
+  value       = aws_apigatewayv2_stage.api_stage.invoke_url
+}
+
+# Lambda outputs
+output "lambda_function_name" {
+  description = "Name of the Lambda function"
+  value       = aws_lambda_function.api_handler.function_name
+}
+
+output "lambda_function_arn" {
+  description = "ARN of the Lambda function"
+  value       = aws_lambda_function.api_handler.arn
+}
