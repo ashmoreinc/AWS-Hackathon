@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Offer, OffersList } from "@/components/offer-list/offer-list";
 import { Switch } from "@/components/ui/switch";
@@ -124,18 +125,22 @@ export default function Home() {
       <section className="absolute top-6 right-6 hidden md:block">
         <Dialog>
           <DialogTrigger asChild>
-            <img
+            <Image
               src="/VisitMeImage.png"
-              className="h-48 cursor-pointer rounded-md shadow-md"
               alt="Visit Me"
+              className="cursor-pointer rounded-md shadow-md"
+              width={192}
+              height={192}
             />
           </DialogTrigger>
 
           <DialogContent className="p-8">
-            <img
+            <Image
               src="/VisitMeImage.png"
-              className="h-full cursor-pointer rounded-md shadow-md p-8"
               alt="Visit Me"
+              className="rounded-md shadow-md"
+              width={800}
+              height={800}
             />
           </DialogContent>
         </Dialog>
