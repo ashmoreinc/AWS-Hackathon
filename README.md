@@ -1,115 +1,95 @@
-# Quick Start - Deploy to AWS
+# Real-Time Offer Management System
 
-## 🚀 One-Command Deployment
+Simple location-based offer targeting system using AWS serverless architecture.
+
+## Model
+
+**Offers**: `high_street` or `online`  
+**Users**: `wifi` (at home) or `mobile` (on the go)
+
+**Logic**:
+- WiFi connection → Show **online** offers first (+50 priority boost)
+- Mobile connection → Show **high street** offers first (+50 priority boost)
+
+## Architecture
+
+- **DynamoDB**: Stores offers and user profiles
+- **Kinesis**: Tracks user events (clicks, redemptions)
+- **Lambda**: 3 functions (get offers, track events, inventory monitor)
+- **API Gateway**: HTTP API endpoints
+
+## Quick Start
+
+### 1. Deploy
 
 ```bash
-./deploy.sh
+./deploy_with_profile.sh
 ```
 
-## 📋 Step-by-Step
-
-### 1. Deploy Infrastructure (5 minutes)
+### 2. Seed Data
 
 ```bash
-./deploy.sh
+export AWS_PROFILE=AdministratorAccess-851311377237
+python3 seed_database.py
 ```
 
-When prompted, type `yes` to deploy.
-
-### 2. Seed Data (30 seconds)
+### 3. Test
 
 ```bash
-python seed_database.py
-```
-
-### 3. Get Your API Endpoint
-
-```bash
-cd terraform
-terraform output api_endpoint
-```
-
-Copy the URL (e.g., `https://abc123.execute-api.us-east-1.amazonaws.com/prod`)
-
-### 4. Test the API
-
-```bash
-python test_api.py https://YOUR_API_ENDPOINT
-```
-
-## 🎯 API Endpoints
-
-### Get Personalized Offers
-
-```bash
-curl -X POST https://YOUR_API_ENDPOINT/offers/recommend \
+# WiFi user (sees online offers first)
+curl -X POST https://YOUR_API/offers/recommend \
   -H "Content-Type: application/json" \
   -d '{"user_id": "USER001"}'
-```
 
-### Track User Event
-
-```bash
-curl -X POST https://YOUR_API_ENDPOINT/events/track \
+# Mobile user (sees high street offers first)
+curl -X POST https://YOUR_API/offers/recommend \
   -H "Content-Type: application/json" \
-  -d '{
-    "user_id": "USER001",
-    "offer_id": "OFF001",
-    "category": "electronics",
-    "event_type": "CLICK"
-  }'
+  -d '{"user_id": "USER002"}'
 ```
 
-## 🏗️ What Gets Deployed
+## API Endpoints
 
-- ✅ DynamoDB Tables (Offers, UserActivity)
-- ✅ Kinesis Stream (offer-engagement-stream)
-- ✅ Lambda Functions (3 functions)
-- ✅ API Gateway (HTTP API)
-- ✅ IAM Roles & Permissions
-- ✅ DynamoDB Streams Triggers
+**POST /offers/recommend**
+```json
+{
+  "user_id": "USER001",
+  "connection_type": "wifi"  // optional override
+}
+```
 
-## 💰 Cost
+**POST /events/track**
+```json
+{
+  "user_id": "USER001",
+  "offer_id": "OFF002",
+  "offer_type": "online",
+  "event_type": "CLICK"
+}
+```
 
-~$13/month for 100K requests
+## Sample Offers
 
-## 🧹 Cleanup
+**Online** (WiFi priority):
+- Amazon Prime Deal (30% off)
+- ASOS Online Sale (40% off)
+- Deliveroo Discount (£5 off)
+
+**High Street** (Mobile priority):
+- Starbucks Coffee (20% off)
+- Tesco In-Store (£10 off)
+- Costa Coffee (15% off)
+
+## Postman Collection
+
+Import `Offer_Management_Simple.postman_collection.json` for ready-to-use API tests.
+
+## Cost
+
+~$10/month for 100K requests
+
+## Cleanup
 
 ```bash
 cd terraform
 terraform destroy
-```
-
-## 📚 Full Documentation
-
-See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for detailed instructions.
-
-## 🎬 Demo Flow
-
-1. **Get offers** for USER001 (electronics fan)
-2. **Track click** on electronics offer
-3. **Simulate stockout** by setting inventory to 0
-4. **Watch auto-pivot** in CloudWatch Logs
-5. **Get offers** again - see boosted pivot offer
-
-## ⚡ Key Features
-
-- **Real-time ranking** with Multi-Armed Bandit algorithm
-- **Auto-pivot** on stockout (DynamoDB Streams)
-- **Event tracking** via Kinesis
-- **Diversity filter** (max 2 offers per category)
-- **Sub-100ms latency**
-
-## 🔧 Requirements
-
-- AWS CLI configured
-- Terraform 1.0+
-- Python 3.11+
-- Boto3 (`pip install boto3`)
-
-## 📞 Support
-
-Check CloudWatch Logs if issues occur:
-```bash
-aws logs tail /aws/lambda/offer-get-offers --follow
 ```

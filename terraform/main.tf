@@ -68,7 +68,7 @@ resource "aws_dynamodb_table" "user_activity" {
 
 resource "aws_kinesis_stream" "offer_engagement" {
   name             = "offer-engagement-stream"
-  shard_count      = 2
+  shard_count      = 1
   retention_period = 24
 }
 
