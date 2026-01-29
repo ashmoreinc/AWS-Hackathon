@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Offer, OffersList } from "@/components/offer-list/offer-list";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { mockOffers } from "./offers/mock-data";
+import { mockOffers } from "./mock-data";
 
 export default function Home() {
   const [offers, setOffers] = useState<Offer[]>([]);
