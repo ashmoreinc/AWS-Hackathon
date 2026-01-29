@@ -6,15 +6,13 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { mockOffers } from "./mock-data";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import { Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 function UserIdPills({
   userIds,
@@ -63,7 +61,7 @@ export default function Home() {
   const fetchOffers = (service: string, time?: string) => {
     setIsLoading(true);
 
-    console.log(time ? {current_time: time + ":00"} : {})
+    console.log(time ? { current_time: time + ":00" } : {});
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/offers/recommend`, {
       method: "POST",
       headers: {
@@ -72,7 +70,7 @@ export default function Home() {
       body: JSON.stringify({
         user_id: selectedUserId,
         connection_type: service,
-        ...(time ? {current_time: time + ":00"} : {}),
+        ...(time ? { current_time: time + ":00" } : {}),
       }),
     })
       .then((response) => response.json())
@@ -113,10 +111,9 @@ export default function Home() {
     ).value;
 
     const timeSelect = document.getElementById(
-        "hour-input",
-      ) as HTMLInputElement | null;
+      "hour-input",
+    ) as HTMLInputElement | null;
 
-    
     fetchOffers(service, timeSelect?.value || undefined);
   };
 
@@ -125,7 +122,23 @@ export default function Home() {
       <h1 className="text-5xl font-bold">AWS Hackathon Demo - Team Rotom</h1>
 
       <section className="absolute top-6 right-6 hidden md:block">
-        <img src="/VisitMeImage.png" className="h-48" />
+        <Dialog>
+          <DialogTrigger asChild>
+            <img
+              src="/VisitMeImage.png"
+              className="h-48 cursor-pointer rounded-md shadow-md"
+              alt="Visit Me"
+            />
+          </DialogTrigger>
+
+          <DialogContent className="p-8">
+            <img
+              src="/VisitMeImage.png"
+              className="h-full cursor-pointer rounded-md shadow-md p-8"
+              alt="Visit Me"
+            />
+          </DialogContent>
+        </Dialog>
       </section>
 
       {/* User Input Section */}
