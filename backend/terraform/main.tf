@@ -17,8 +17,6 @@ resource "aws_dynamodb_table" "offers" {
   billing_mode   = "PAY_PER_REQUEST"
   hash_key       = "PK"
   range_key      = "SK"
-  stream_enabled = true
-  stream_view_type = "NEW_AND_OLD_IMAGES"
 
   attribute {
     name = "PK"
@@ -27,21 +25,6 @@ resource "aws_dynamodb_table" "offers" {
   attribute {
     name = "SK"
     type = "S"
-  }
-  attribute {
-    name = "category"
-    type = "S"
-  }
-  attribute {
-    name = "priority"
-    type = "N"
-  }
-
-  global_secondary_index {
-    name            = "category-priority-index"
-    hash_key        = "category"
-    range_key       = "priority"
-    projection_type = "ALL"
   }
 
   ttl {
@@ -154,29 +137,6 @@ resource "aws_lambda_function" "track_event" {
   }
 }
 
-resource "aws_lambda_function" "inventory_monitor" {
-  filename         = "../lambda/deployment.zip"
-  function_name    = "offer-inventory-monitor"
-  role            = aws_iam_role.lambda_role.arn
-  handler         = "inventory_monitor.lambda_handler"
-  runtime         = "python3.11"
-  timeout         = 30
-  memory_size     = 256
-  source_code_hash = filebase64sha256("../lambda/deployment.zip")
-
-  environment {
-    variables = {
-      OFFERS_TABLE = aws_dynamodb_table.offers.name
-    }
-  }
-}
-
-resource "aws_lambda_event_source_mapping" "dynamodb_trigger" {
-  event_source_arn  = aws_dynamodb_table.offers.stream_arn
-  function_name     = aws_lambda_function.inventory_monitor.arn
-  starting_position = "LATEST"
-  batch_size        = 10
-}
 
 resource "aws_apigatewayv2_api" "offer_api" {
   name          = "offer-management-api"

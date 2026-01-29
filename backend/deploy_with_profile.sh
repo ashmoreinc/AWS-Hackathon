@@ -25,7 +25,7 @@ echo ""
 echo "📦 Packaging Lambda functions..."
 cd lambda
 rm -f deployment.zip
-zip -q deployment.zip get_offers.py track_event.py inventory_monitor.py
+zip -q deployment.zip get_offers.py track_event.py
 echo "✓ Lambda packaged ($(ls -lh deployment.zip | awk '{print $5}'))"
 cd ..
 
