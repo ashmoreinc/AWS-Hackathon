@@ -129,10 +129,8 @@ export default function Home() {
   };
 
   return (
-    <main className="flex flex-col max-w-7xl mx-auto p-6 space-y-8">
+    <main className="flex flex-col max-w-7xl mx-auto p-6 space-y-8 mb-16">
       <h1 className="text-5xl font-bold">AWS Hackathon Demo - Team Rotom</h1>
-
-
 
       <section className="absolute top-6 right-6 hidden md:block">
         <img src="/VisitMeImage.png" className="h-48" />
