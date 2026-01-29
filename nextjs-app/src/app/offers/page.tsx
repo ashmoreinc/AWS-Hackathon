@@ -1,3 +1,4 @@
+"use client";
 import { z } from "zod";
 import Image from "next/image";
 import {
@@ -10,6 +11,13 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { mockOffers } from "./mock-data";
 import { Badge } from "@/components/ui/badge";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { useState } from "react";
 
 // Zod schema
 const OfferSchema = z.object({
@@ -68,9 +76,18 @@ function OfferImage({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-function OfferCard({ offer }: { offer: Offer }) {
+function OfferCard({
+  offer,
+  onClick,
+}: {
+  offer: Offer;
+  onClick: (offer: Offer) => void;
+}) {
   return (
-    <Card className="h-full w-full flex flex-col rounded-2xl border bg-background shadow-sm transition hover:shadow-md py-0">
+    <Card
+      onClick={() => onClick(offer)}
+      className="h-full w-full cursor-pointer flex flex-col rounded-2xl border bg-background shadow-sm transition hover:shadow-md hover:ring-1 hover:ring-muted py-0"
+    >
       <OfferImage src={offer.image} alt={offer.name} />
 
       <CardContent className="flex flex-1 flex-col gap-3 p-4">
@@ -109,7 +126,86 @@ function OfferCard({ offer }: { offer: Offer }) {
   );
 }
 
+function OfferDrawer({
+  offer,
+  open,
+  onOpenChange,
+}: {
+  offer: Offer | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  if (!offer) return null;
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="max-h-[90vh]">
+        <div className="mx-auto w-full max-w-4xl p-6">
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl">
+              <Image
+                src={offer.image}
+                alt={offer.name}
+                fill
+                className="object-cover"
+              />
+            </div>
+
+            <div className="space-y-4 text-sm">
+              <DrawerHeader className="text-4xl p-0">
+                <DrawerTitle className="text-start">{offer.name}</DrawerTitle>
+              </DrawerHeader>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="secondary">{offer.offerType}</Badge>
+                <Badge variant="secondary">{offer.redemptionType}</Badge>
+                {offer.boost && (
+                  <Badge className="bg-green-500/15 text-green-700">
+                    Boosted
+                  </Badge>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <p>
+                  <span className="font-medium">Commission:</span>{" "}
+                  {offer.commission}%
+                </p>
+                <p>
+                  <span className="font-medium">Expires:</span>{" "}
+                  {new Date(offer.expiry).toLocaleString()}
+                </p>
+                <p className="text-muted-foreground">
+                  {timeUntilExpiry(offer.expiry)}
+                </p>
+              </div>
+
+              {offer.tags.length > 0 ? (
+                <div>
+                  <p className="font-medium mb-1">Tags</p>
+                  <div className="flex flex-wrap gap-1">
+                    {offer.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
 export default function OffersPage() {
+  const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
   return (
     <div className="max-w-5xl mx-auto px-6 py-10">
       <h1 className="text-3xl font-semibold mb-6">Featured Offers</h1>
@@ -121,13 +217,25 @@ export default function OffersPage() {
               key={offer.id}
               className="md:basis-1/2 lg:basis-1/3 flex items-stretch"
             >
-              <OfferCard offer={offer} />
+              <OfferCard
+                offer={offer}
+                onClick={(offer) => {
+                  setSelectedOffer(offer);
+                  setDrawerOpen(true);
+                }}
+              />
             </CarouselItem>
           ))}
         </CarouselContent>
         <CarouselPrevious />
         <CarouselNext />
       </Carousel>
+
+      <OfferDrawer
+        offer={selectedOffer}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+      />
     </div>
   );
 }
