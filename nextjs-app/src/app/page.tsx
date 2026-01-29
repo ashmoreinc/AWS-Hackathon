@@ -64,7 +64,7 @@ export default function Home() {
 
       {/* User Input Section */}
       <section className="p-6 rounded-lg shadow-md bg-gray-50 w-2/5">
-        <h2 className="text-xl font-semibold mb-4">Who are you?</h2>
+        <h2 className="text-xl font-semibold mb-4">User configuration</h2>
 
         <div className="flex space-x-2 mb-4">
           <Switch

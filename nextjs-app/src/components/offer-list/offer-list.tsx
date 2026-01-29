@@ -123,10 +123,6 @@ function OfferDrawer({
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="max-h-[90vh]">
         <div className="mx-auto w-full max-w-4xl p-6">
-          <DrawerHeader>
-            <DrawerTitle>{offer.name}</DrawerTitle>
-          </DrawerHeader>
-
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl">
               <Image
@@ -138,6 +134,11 @@ function OfferDrawer({
             </div>
 
             <div className="space-y-4 text-sm">
+              <DrawerHeader className="px-0">
+                <DrawerTitle className="text-4xl text-start">
+                  {offer.name}
+                </DrawerTitle>
+              </DrawerHeader>
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary">{offer.offerType}</Badge>
                 <Badge variant="secondary">{offer.redemptionType}</Badge>
@@ -162,19 +163,21 @@ function OfferDrawer({
                 </p>
               </div>
 
-              <div>
-                <p className="font-medium mb-1">Tags</p>
-                <div className="flex flex-wrap gap-1">
-                  {offer.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
+              {offer.tags.length > 0 ? (
+                <div>
+                  <p className="font-medium mb-1">Tags</p>
+                  <div className="flex flex-wrap gap-1">
+                    {offer.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </div>
           </div>
         </div>
