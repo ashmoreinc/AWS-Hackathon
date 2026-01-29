@@ -18,6 +18,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { off } from "process";
 
 // Reuse your existing Zod schema and Offer type (export if needed)
 export const OfferSchema = z.object({
@@ -31,6 +32,7 @@ export const OfferSchema = z.object({
   tags: z.array(z.string()),
   redemptionType: z.string(),
   final_score: z.number().optional(),
+  inventory_count: z.number().optional(),
 });
 export type Offer = z.infer<typeof OfferSchema>;
 
@@ -91,6 +93,11 @@ function OfferCard({
             <Badge variant="secondary">{offer.redemptionType}</Badge>
             {offer.boost && (
               <Badge className="bg-green-500/15 text-green-700">Boosted</Badge>
+            )}
+            {offer.inventory_count !== undefined && (
+              <Badge className="bg-blue-500/15 text-blue-700">
+                {offer.inventory_count} left
+              </Badge>
             )}
           </div>
         </div>

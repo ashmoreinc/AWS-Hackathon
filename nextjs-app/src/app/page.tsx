@@ -64,6 +64,12 @@ export default function Home() {
     <main className="flex flex-col max-w-7xl mx-auto p-6 space-y-8">
       <h1 className="text-5xl font-bold">AWS Hackathon Demo - Team Rotom</h1>
 
+
+
+      <section className="absolute top-6 right-6 hidden md:block">
+        <img src="/VisitMeImage.png" className="h-48" />
+      </section>
+
       {/* User Input Section */}
       <section className="p-6 rounded-lg shadow-md bg-gray-50 w-2/5">
         <h2 className="text-xl font-semibold mb-4">User configuration</h2>
