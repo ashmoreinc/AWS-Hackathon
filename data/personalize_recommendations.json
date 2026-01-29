@@ -1,0 +1,21 @@
+{
+  "user_id": "USER001",
+  "personalize_recommendations": [
+    {
+      "offer_id": "088ead6c37f3a5715d32d67bf99ebb32",
+      "personalize_score": 1.5
+    },
+    {
+      "offer_id": "1a5eda4a-469a-43b1-9ca5-dd833db65c7b",
+      "personalize_score": 1
+    },
+    {
+      "offer_id": "2ac2154c-b08a-4273-8198-3de1ce8f8ce4",
+      "personalize_score": 1
+    },
+    {
+      "offer_id": "2e2c2978-2992-442c-9b02-6de2838f575e",
+      "personalize_score": 3
+    }
+  ]
+}

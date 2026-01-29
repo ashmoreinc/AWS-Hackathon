@@ -25,7 +25,16 @@ echo ""
 echo "📦 Packaging Lambda functions..."
 cd lambda
 rm -f deployment.zip
-zip -q deployment.zip get_offers.py track_event.py
+
+# Copy data files to lambda directory temporarily
+cp -r ../../data .
+
+# Create zip with Python files and data
+zip -q -r deployment.zip get_offers.py track_event.py data/
+
+# Clean up
+rm -rf data
+
 echo "✓ Lambda packaged ($(ls -lh deployment.zip | awk '{print $5}'))"
 cd ..
 
