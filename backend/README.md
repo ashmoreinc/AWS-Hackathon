@@ -23,6 +23,7 @@ Simple location-based offer targeting system using AWS serverless architecture.
 ### 1. Deploy
 
 ```bash
+cd backend
 ./deploy_with_profile.sh
 ```
 
@@ -30,12 +31,14 @@ Simple location-based offer targeting system using AWS serverless architecture.
 
 ```bash
 export AWS_PROFILE=AdministratorAccess-851311377237
+cd backend
 python3 seed_database.py
 ```
 
 ### 3. Test
 
 ```bash
+cd backend
 # WiFi user (sees online offers first)
 curl -X POST https://YOUR_API/offers/recommend \
   -H "Content-Type: application/json" \
@@ -90,6 +93,6 @@ Import `Offer_Management_Simple.postman_collection.json` for ready-to-use API te
 ## Cleanup
 
 ```bash
-cd terraform
+cd backend/terraform
 terraform destroy
 ```

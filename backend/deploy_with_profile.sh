@@ -56,8 +56,8 @@ if [ "$confirm" = "yes" ]; then
     echo ""
     echo ""
     echo "📝 Next steps:"
-    echo "1. Seed data: python ../seed_database.py"
-    echo "2. Test API: python ../test_api.py \$(terraform output -raw api_endpoint)"
+    echo "1. Seed data: cd .. && python seed_database.py"
+    echo "2. Test API: python test_api.py \$(cd terraform && terraform output -raw api_endpoint)"
     echo ""
 else
     echo "❌ Deployment cancelled"
