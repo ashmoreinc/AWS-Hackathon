@@ -6,12 +6,80 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { mockOffers } from "./mock-data";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import { Check } from "lucide-react";
+
+function UserIdSelect({
+  userIds,
+  selectedUserId,
+  onChange,
+}: {
+  userIds: string[];
+  selectedUserId: string | null;
+  onChange: (userId: string) => void;
+}) {
+  const [search, setSearch] = useState("");
+
+  // Filter user IDs by search term (case-insensitive)
+  const filteredUserIds = userIds.filter((id) =>
+    id.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  // Only show items if input is not empty
+  const showItems = search.trim().length > 0;
+
+  return (
+    <div className="mb-4">
+      <label htmlFor="user-id-select" className="mb-1 block font-medium">
+        Select User ID
+      </label>
+      <Command>
+        <CommandInput
+          placeholder="Search user ID..."
+          value={search}
+          onValueChange={setSearch}
+        />
+        <CommandGroup>
+          {showItems && filteredUserIds.length === 0 && (
+            <CommandEmpty>No users found.</CommandEmpty>
+          )}
+          {showItems &&
+            filteredUserIds.map((userId) => (
+              <CommandItem
+                key={userId}
+                onSelect={() => {
+                  onChange(userId);
+                  setSearch(""); // optional: clear search on select
+                }}
+                className="flex items-center justify-between"
+              >
+                {userId}
+                {selectedUserId === userId && (
+                  <Check className="ml-2 h-4 w-4 text-blue-600" />
+                )}
+              </CommandItem>
+            ))}
+        </CommandGroup>
+      </Command>
+    </div>
+  );
+}
 
 export default function Home() {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [useMockData, setUseMockData] = useState(false);
   const [showDebugInfo, setShowDebugInfo] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(
+    "USER001",
+  );
+  const mockUserIds = ["USER001", "USER002", "USER003", "ALICE", "BOB"];
 
   const fetchOffers = (service: string) => {
     setIsLoading(true);
@@ -21,7 +89,7 @@ export default function Home() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        user_id: "USER001",
+        user_id: selectedUserId,
         connection_type: service,
       }),
     })
@@ -50,7 +118,7 @@ export default function Home() {
       const service = serviceSelect?.value || "wifi";
       fetchOffers(service);
     }
-  }, [useMockData]);
+  }, [useMockData, selectedUserId]);
 
   const onUserChange = () => {
     if (useMockData) return; // Skip fetch if using mock data
@@ -71,36 +139,45 @@ export default function Home() {
       </section>
 
       {/* User Input Section */}
-      <section className="p-6 rounded-lg shadow-md bg-gray-50 w-2/5">
+      <section className="p-6 rounded-lg shadow-md bg-gray-50">
         <h2 className="text-xl font-semibold mb-4">User configuration</h2>
 
-        <div className="flex space-x-2 mb-4">
-          <Switch
-            id="use-mock-toggle"
-            checked={useMockData}
-            onCheckedChange={setUseMockData}
-          />
-          <Label
-            htmlFor="use-mock-toggle"
-            className="cursor-pointer select-none"
-          >
-            Use Mock Data
-          </Label>
-        </div>
-        <div className="flex space-x-2 mb-4">
-          <Switch
-            id="show-debug-toggle"
-            checked={showDebugInfo}
-            onCheckedChange={setShowDebugInfo}
-          />
-          <Label
-            htmlFor="show-debug-toggle"
-            className="cursor-pointer select-none"
-          >
-            Show Debug Info
-          </Label>
+        <div className="flex gap-5">
+          <div className="flex space-x-2 mb-4">
+            <Switch
+              id="use-mock-toggle"
+              checked={useMockData}
+              onCheckedChange={setUseMockData}
+            />
+            <Label
+              htmlFor="use-mock-toggle"
+              className="cursor-pointer select-none"
+            >
+              Use Mock Data
+            </Label>
+          </div>
+          <div className="flex space-x-2 mb-4">
+            <Switch
+              id="show-debug-toggle"
+              checked={showDebugInfo}
+              onCheckedChange={setShowDebugInfo}
+            />
+            <Label
+              htmlFor="show-debug-toggle"
+              className="cursor-pointer select-none"
+            >
+              Show Debug Info
+            </Label>
+          </div>
         </div>
         <div className="flex flex-col space-y-4">
+          <UserIdSelect
+            userIds={mockUserIds}
+            selectedUserId={selectedUserId}
+            onChange={setSelectedUserId}
+          />
+        </div>
+        <div className="flex gap-5">
           <div>
             <Label htmlFor="service-select" className="mb-1 block font-medium">
               Choose your network type:

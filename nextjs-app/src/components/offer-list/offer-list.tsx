@@ -32,6 +32,8 @@ export const OfferSchema = z.object({
   tags: z.array(z.string()),
   redemptionType: z.string(),
   final_score: z.number().optional(),
+  base_score: z.number().optional(),
+  personalize_score: z.number().optional(),
   inventory_count: z.number().optional(),
 });
 export type Offer = z.infer<typeof OfferSchema>;
@@ -110,6 +112,10 @@ function OfferCard({
           <div className="space-y-1 text-sm text-muted-foreground">
             <p>Debug info</p>
             <p>Offer Final Score: {offer.final_score}</p>
+            <p>Offer Base Score: {offer.base_score}</p>
+            <p>Offer Personalise Score: {offer.personalize_score}</p>
+            <p>Offer Commission: {offer.commission}</p>
+            <p>Offer Inventory Count: {offer.inventory_count}</p>
           </div>
         ) : null}
       </CardContent>
