@@ -58,13 +58,19 @@ export function timeUntilExpiry(expiryISO: string): string {
 function OfferImage({ src, alt }: { src: string; alt: string }) {
   return (
     <div className="relative w-full h-44 rounded-t-2xl overflow-hidden">
-      <Image
+      {src && <Image
         src={src}
         alt={alt}
         fill
         className="object-cover"
         sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-      />
+      />}
+
+      {!src && (
+        <div className="flex h-full w-full items-center justify-center bg-gray-200">
+          <span className="text-gray-500">No Image</span>
+        </div>
+      )}
     </div>
   );
 }
