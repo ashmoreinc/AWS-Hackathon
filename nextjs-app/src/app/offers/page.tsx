@@ -1,4 +1,5 @@
 import { z } from "zod";
+import Image from "next/image";
 import {
   Carousel,
   CarouselContent,
@@ -8,6 +9,7 @@ import {
 } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
 import { mockOffers } from "./mock-data";
+import { Badge } from "@/components/ui/badge";
 
 // Zod schema
 const OfferSchema = z.object({
@@ -50,50 +52,76 @@ export function timeUntilExpiry(expiryISO: string): string {
 // Mock data
 const offers = mockOffers.map((offer) => OfferSchema.parse(offer));
 
+type Offer = z.infer<typeof OfferSchema>;
+
+function OfferImage({ src, alt }: { src: string; alt: string }) {
+  return (
+    <div className="relative w-full h-44 rounded-t-2xl overflow-hidden">
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        className="object-cover"
+        sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+      />
+    </div>
+  );
+}
+
+function OfferCard({ offer }: { offer: Offer }) {
+  return (
+    <Card className="h-full w-full flex flex-col rounded-2xl border bg-background shadow-sm transition hover:shadow-md">
+      <OfferImage src={offer.image} alt={offer.name} />
+
+      <CardContent className="flex flex-1 flex-col gap-3 p-4">
+        <div className="space-y-1">
+          <h2 className="text-base font-semibold leading-tight">
+            {offer.name}
+          </h2>
+
+          <div className="flex flex-wrap gap-1 text-xs">
+            <Badge variant="secondary">{offer.offerType}</Badge>
+            <Badge variant="secondary">{offer.redemptionType}</Badge>
+            {offer.boost && (
+              <Badge className="bg-green-500/15 text-green-700">Boosted</Badge>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-auto space-y-2">
+          <p className="text-xs text-muted-foreground">
+            {timeUntilExpiry(offer.expiry)}
+          </p>
+
+          <div className="flex flex-wrap gap-1">
+            {offer.tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground"
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function OffersPage() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-10">
       <h1 className="text-3xl font-semibold mb-6">Featured Offers</h1>
 
-      <Carousel className="relative">
+      <Carousel className="relative -mx-2">
         <CarouselContent className="p-4 items-stretch">
           {offers.map((offer) => (
             <CarouselItem
               key={offer.id}
               className="md:basis-1/2 lg:basis-1/3 flex items-stretch"
             >
-              <Card className="rounded-2xl shadow-md overflow-hidden h-full flex flex-col w-full">
-                <img
-                  src={offer.image}
-                  alt={offer.name}
-                  className="h-40 w-full object-cover"
-                />
-                <CardContent className="p-4 space-y-2 flex flex-col flex-1">
-                  <h2 className="text-lg font-medium">{offer.name}</h2>
-                  <p className="text-sm text-muted-foreground">
-                    {offer.offerType} • {offer.redemptionType}
-                  </p>
-                  <div className="flex items-center justify-between text-sm">
-                    <span>Boost: {offer.boost}×</span>
-                    <span>Commission: {offer.commission}%</span>
-                  </div>
-                  <div className="mt-auto space-y-2">
-                    <p className="text-xs text-muted-foreground">
-                      {timeUntilExpiry(offer.expiry)}
-                    </p>
-                    <div className="flex flex-wrap gap-1 pt-1">
-                      {offer.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-xs bg-secondary px-2 py-0.5 rounded-full"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <OfferCard offer={offer} />
             </CarouselItem>
           ))}
         </CarouselContent>

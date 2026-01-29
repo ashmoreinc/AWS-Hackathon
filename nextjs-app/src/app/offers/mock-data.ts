@@ -4,7 +4,7 @@ export const mockOffers = [
     name: "10% OFF Mortgage Advice Fees $$$",
     image:
       "https://cdn.sanity.io/images/td1j6hke/production/22c41f7a8fe6b843c993c7d35e95617e706b9477-640x320.jpg",
-    boost: false,
+    boost: true,
     commission: 3,
     expiry: "2029-01-01T00:00:00.000Z",
     offerType: "local",
@@ -28,7 +28,7 @@ export const mockOffers = [
     name: "15% $$$",
     image:
       "https://cdn.sanity.io/images/td1j6hke/production/5763521db2461b13093cde0d6e135693f81f4316-640x320.jpg",
-    boost: false,
+    boost: true,
     commission: 3,
     expiry: "2029-11-30T23:59:59.000Z",
     offerType: "local",
@@ -76,7 +76,7 @@ export const mockOffers = [
     name: "Get 10% off food &amp; drink $$$$$",
     image:
       "https://cdn.sanity.io/images/td1j6hke/production/b893aa0545d6d7f4cf28751944fc6aab20d4087d-640x320.jpg",
-    boost: false,
+    boost: true,
     commission: 5,
     expiry: "2030-03-31T22:59:59.000Z",
     offerType: "local",
@@ -88,7 +88,7 @@ export const mockOffers = [
     name: "35% off tickets for Jurassic World: The Experience $",
     image:
       "https://cdn.sanity.io/images/td1j6hke/production/61827d8aa0ee47624d7212207575b60d20f553e9-640x320.jpg",
-    boost: false,
+    boost: true,
     commission: 1,
     expiry: "2025-12-22T23:45:00.000Z",
     offerType: "online",
@@ -103,42 +103,6 @@ export const mockOffers = [
     boost: false,
     commission: 2,
     expiry: "2029-08-31T23:59:59.000Z",
-    offerType: "local",
-    tags: [],
-    redemptionType: "showCard",
-  },
-  {
-    id: "004105db03000faf9dabd1e0ae7511b6",
-    name: "10% discount $$",
-    image:
-      "https://cdn.sanity.io/images/td1j6hke/production/b893aa0545d6d7f4cf28751944fc6aab20d4087d-640x320.jpg",
-    boost: false,
-    commission: 2,
-    expiry: "2026-05-31T00:00:00.000Z",
-    offerType: "local",
-    tags: [],
-    redemptionType: "showCard",
-  },
-  {
-    id: "004437fdf88b621819b8a365a82a7730",
-    name: "10% Off $",
-    image:
-      "https://cdn.sanity.io/images/td1j6hke/production/b893aa0545d6d7f4cf28751944fc6aab20d4087d-640x320.jpg",
-    boost: false,
-    commission: 1,
-    expiry: "2029-08-01T00:00:00.000Z",
-    offerType: "local",
-    tags: [],
-    redemptionType: "preApplied",
-  },
-  {
-    id: "0044711b4a93e30f4db99b9b2b81b5d9",
-    name: "10% discount  ",
-    image:
-      "https://cdn.sanity.io/images/td1j6hke/production/b893aa0545d6d7f4cf28751944fc6aab20d4087d-640x320.jpg",
-    boost: false,
-    commission: 0,
-    expiry: "2026-12-31T23:59:59.000Z",
     offerType: "local",
     tags: [],
     redemptionType: "showCard",
