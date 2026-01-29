@@ -81,8 +81,10 @@ export default function Home() {
   );
   const mockUserIds = ["USER001", "USER002", "USER003", "ALICE", "BOB"];
 
-  const fetchOffers = (service: string) => {
+  const fetchOffers = (service: string, time?: string) => {
     setIsLoading(true);
+
+    console.log(time ? {current_time: time + ":00"} : {})
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/offers/recommend`, {
       method: "POST",
       headers: {
@@ -91,6 +93,7 @@ export default function Home() {
       body: JSON.stringify({
         user_id: selectedUserId,
         connection_type: service,
+        ...(time ? {current_time: time + ":00"} : {}),
       }),
     })
       .then((response) => response.json())
@@ -115,8 +118,12 @@ export default function Home() {
       const serviceSelect = document.getElementById(
         "service-select",
       ) as HTMLSelectElement | null;
+      const timeSelect = document.getElementById(
+        "hour-input",
+      ) as HTMLInputElement | null;
+      const time = timeSelect?.value || undefined;
       const service = serviceSelect?.value || "wifi";
-      fetchOffers(service);
+      fetchOffers(service, time);
     }
   }, [useMockData, selectedUserId]);
 
@@ -125,7 +132,13 @@ export default function Home() {
     const service = (
       document.getElementById("service-select") as HTMLSelectElement
     ).value;
-    fetchOffers(service);
+
+    const timeSelect = document.getElementById(
+        "hour-input",
+      ) as HTMLInputElement | null;
+
+    
+    fetchOffers(service, timeSelect?.value || undefined);
   };
 
   return (
