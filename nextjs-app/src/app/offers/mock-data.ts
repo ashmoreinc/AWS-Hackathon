@@ -49,7 +49,7 @@ export const mockOffers = [
   },
   {
     id: "00279091-6d56-4f6b-b43e-bd8616f1f3c7",
-    name: "Monday to Friday enjoy a 20% discount on food bill only. (Not applicable on beverages) $$$",
+    name: "Monday to Friday enjoy a 20% discount on food bill only. $$$",
     image:
       "https://cdn.sanity.io/images/td1j6hke/production/aff54e6040ba01d16c82ea22cb25d2851d7a35dd-640x320.jpg",
     boost: false,

@@ -70,12 +70,12 @@ function OfferImage({ src, alt }: { src: string; alt: string }) {
 
 function OfferCard({ offer }: { offer: Offer }) {
   return (
-    <Card className="h-full w-full flex flex-col rounded-2xl border bg-background shadow-sm transition hover:shadow-md">
+    <Card className="h-full w-full flex flex-col rounded-2xl border bg-background shadow-sm transition hover:shadow-md py-0">
       <OfferImage src={offer.image} alt={offer.name} />
 
       <CardContent className="flex flex-1 flex-col gap-3 p-4">
         <div className="space-y-1">
-          <h2 className="text-base font-semibold leading-tight">
+          <h2 className="text-base font-semibold leading-tight mb-2">
             {offer.name}
           </h2>
 
