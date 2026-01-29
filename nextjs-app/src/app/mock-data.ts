@@ -24,18 +24,6 @@ export const mockOffers = [
     redemptionType: "generic",
   },
   {
-    id: "00163d368056476b271aefe35fde049f",
-    name: "15% $$$",
-    image:
-      "https://cdn.sanity.io/images/td1j6hke/production/5763521db2461b13093cde0d6e135693f81f4316-640x320.jpg",
-    boost: true,
-    commission: 3,
-    expiry: "2029-11-30T23:59:59.000Z",
-    offerType: "local",
-    tags: [],
-    redemptionType: "showCard",
-  },
-  {
     id: "001ae136522d12c82ce7a061936fff44",
     name: "Get 10% off Hair Services ",
     image:
