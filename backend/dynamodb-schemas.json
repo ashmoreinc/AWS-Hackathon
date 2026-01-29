@@ -19,52 +19,6 @@
       {
         "AttributeName": "SK",
         "AttributeType": "S"
-      },
-      {
-        "AttributeName": "category",
-        "AttributeType": "S"
-      },
-      {
-        "AttributeName": "priority",
-        "AttributeType": "N"
-      },
-      {
-        "AttributeName": "expiration_timestamp",
-        "AttributeType": "N"
-      }
-    ],
-    "GlobalSecondaryIndexes": [
-      {
-        "IndexName": "category-priority-index",
-        "KeySchema": [
-          {
-            "AttributeName": "category",
-            "KeyType": "HASH"
-          },
-          {
-            "AttributeName": "priority",
-            "KeyType": "RANGE"
-          }
-        ],
-        "Projection": {
-          "ProjectionType": "ALL"
-        }
-      },
-      {
-        "IndexName": "expiration-index",
-        "KeySchema": [
-          {
-            "AttributeName": "category",
-            "KeyType": "HASH"
-          },
-          {
-            "AttributeName": "expiration_timestamp",
-            "KeyType": "RANGE"
-          }
-        ],
-        "Projection": {
-          "ProjectionType": "ALL"
-        }
       }
     ],
     "BillingMode": "PAY_PER_REQUEST",
@@ -80,19 +34,19 @@
       "PK": "OFFER#{offer_id}",
       "SK": "METADATA",
       "offer_id": "string - unique identifier",
-      "offer_name": "string - display name",
-      "category": "string - product category (electronics, fashion, food, etc.)",
-      "discount_type": "string - PERCENTAGE | FIXED_AMOUNT | BOGO",
+      "offer_name": "string - display name (e.g., Starbucks Coffee, Amazon Prime Deal)",
+      "offer_type": "string - high_street | online",
+      "discount_type": "string - PERCENTAGE | FIXED_AMOUNT",
       "discount_value": "number - discount amount or percentage",
       "priority": "number - 1-100, higher = more important",
       "inventory_count": "number - available redemptions",
       "expiration_timestamp": "number - Unix epoch (TTL enabled)",
-      "min_purchase_amount": "number - minimum cart value",
-      "max_discount_cap": "number - maximum discount in currency",
-      "target_segments": "list - [premium, standard, new_user]",
-      "margin_impact": "number - profit margin percentage",
       "created_at": "number - Unix epoch",
       "status": "string - ACTIVE | PAUSED | EXPIRED"
+    },
+    "AccessPatterns": {
+      "GetActiveOffers": "Scan with FilterExpression: status = ACTIVE AND inventory_count > 0",
+      "GetOfferById": "GetItem with PK = OFFER#{offer_id}, SK = METADATA"
     }
   },
   "UserActivity": {
@@ -115,105 +69,49 @@
       {
         "AttributeName": "SK",
         "AttributeType": "S"
-      },
-      {
-        "AttributeName": "activity_type",
-        "AttributeType": "S"
-      },
-      {
-        "AttributeName": "timestamp",
-        "AttributeType": "N"
-      }
-    ],
-    "GlobalSecondaryIndexes": [
-      {
-        "IndexName": "activity-type-index",
-        "KeySchema": [
-          {
-            "AttributeName": "PK",
-            "KeyType": "HASH"
-          },
-          {
-            "AttributeName": "activity_type",
-            "KeyType": "RANGE"
-          }
-        ],
-        "Projection": {
-          "ProjectionType": "ALL"
-        }
-      },
-      {
-        "IndexName": "timestamp-index",
-        "KeySchema": [
-          {
-            "AttributeName": "PK",
-            "KeyType": "HASH"
-          },
-          {
-            "AttributeName": "timestamp",
-            "KeyType": "RANGE"
-          }
-        ],
-        "Projection": {
-          "ProjectionType": "ALL"
-        }
       }
     ],
     "BillingMode": "PAY_PER_REQUEST",
-    "StreamSpecification": {
-      "StreamEnabled": true,
-      "StreamViewType": "NEW_AND_OLD_IMAGES"
-    },
     "Schema": {
       "PK": "USER#{user_id}",
-      "SK": "ACTIVITY#{timestamp}#{activity_id} | PROFILE | ENGAGEMENT_SCORE",
+      "SK": "PROFILE | ACTIVITY#{timestamp}#{event_type}#{event_id}",
       "Patterns": {
         "UserProfile": {
           "PK": "USER#{user_id}",
           "SK": "PROFILE",
-          "user_id": "string",
-          "segment": "string - premium | standard | new_user",
-          "lifetime_value": "number",
-          "total_redemptions": "number",
-          "engagement_score": "number - 0-100",
-          "preferred_categories": "list - [category1, category2]",
-          "last_active": "number - Unix epoch",
+          "user_id": "string - unique identifier",
+          "connection_type": "string - wifi | mobile",
           "created_at": "number - Unix epoch"
         },
-        "RedemptionHistory": {
+        "ActivityEvent": {
           "PK": "USER#{user_id}",
-          "SK": "ACTIVITY#{timestamp}#REDEMPTION#{redemption_id}",
-          "activity_type": "REDEMPTION",
+          "SK": "ACTIVITY#{timestamp}#{event_type}#{event_id}",
+          "activity_type": "string - CLICK | VIEW | REDEMPTION | ADD_TO_CART | DISMISS",
           "timestamp": "number - Unix epoch",
-          "offer_id": "string",
-          "category": "string",
-          "discount_amount": "number",
-          "order_value": "number",
-          "conversion_value": "number - revenue after discount",
-          "redemption_channel": "string - web | mobile | email"
-        },
-        "EngagementEvent": {
-          "PK": "USER#{user_id}",
-          "SK": "ACTIVITY#{timestamp}#ENGAGEMENT#{event_id}",
-          "activity_type": "ENGAGEMENT",
-          "timestamp": "number - Unix epoch",
-          "event_type": "string - VIEW | CLICK | DISMISS | ADD_TO_CART",
-          "offer_id": "string",
-          "category": "string",
-          "dwell_time_seconds": "number",
-          "device_type": "string - mobile | desktop | tablet"
-        },
-        "EngagementScore": {
-          "PK": "USER#{user_id}",
-          "SK": "ENGAGEMENT_SCORE",
-          "overall_score": "number - 0-100",
-          "recency_score": "number - 0-100",
-          "frequency_score": "number - 0-100",
-          "monetary_score": "number - 0-100",
-          "category_affinity": "map - {category: score}",
-          "offer_fatigue_score": "number - 0-100, higher = more fatigued",
-          "last_updated": "number - Unix epoch"
+          "offer_id": "string - reference to offer",
+          "offer_type": "string - high_street | online",
+          "event_type": "string - CLICK | VIEW | REDEMPTION | ADD_TO_CART | DISMISS"
         }
+      }
+    },
+    "AccessPatterns": {
+      "GetUserProfile": "GetItem with PK = USER#{user_id}, SK = PROFILE",
+      "GetUserActivity": "Query with PK = USER#{user_id}, SK begins_with ACTIVITY"
+    }
+  },
+  "BusinessLogic": {
+    "OfferRanking": {
+      "Description": "Simple location-based targeting",
+      "Rules": [
+        "WiFi connection → Prioritize online offers (+50 priority boost)",
+        "Mobile connection → Prioritize high_street offers (+50 priority boost)"
+      ],
+      "Formula": "final_score = base_priority + connection_type_boost",
+      "Example": {
+        "User": "USER001 with WiFi",
+        "Offer1": "Amazon Prime (online, priority 95) → Score: 145",
+        "Offer2": "Starbucks (high_street, priority 90) → Score: 90",
+        "Result": "Amazon Prime shown first"
       }
     }
   }
