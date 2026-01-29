@@ -1,0 +1,14 @@
+# terraform.tfvars.example
+# Copy this file to terraform.tfvars and customize for your deployment
+
+# AWS Region
+aws_region = "us-east-1"
+
+# Project name (used for resource naming)
+project_name = "hackathon"
+
+# Environment (dev, staging, prod)
+environment = "dev"
+
+# Optional: Custom domain name for CloudFront
+# domain_name = "yourdomain.com"
