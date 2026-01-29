@@ -1,4 +1,5 @@
 import { z } from "zod";
+import Image from "next/image";
 import {
   Carousel,
   CarouselContent,
@@ -8,6 +9,7 @@ import {
 } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
 import { mockOffers } from "./mock-data";
+import { Badge } from "@/components/ui/badge";
 
 // Zod schema
 const OfferSchema = z.object({
@@ -63,19 +65,32 @@ export default function OffersPage() {
               className="md:basis-1/2 lg:basis-1/3 flex items-stretch"
             >
               <Card className="rounded-2xl shadow-md overflow-hidden h-full flex flex-col w-full">
-                <img
-                  src={offer.image}
-                  alt={offer.name}
-                  className="h-40 w-full object-cover"
-                />
+                <div className="relative w-full h-40">
+                  <Image
+                    src={offer.image}
+                    alt={offer.name}
+                    fill
+                    className="object-cover"
+                    sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                    priority={false}
+                  />
+                </div>
                 <CardContent className="p-4 space-y-2 flex flex-col flex-1">
-                  <h2 className="text-lg font-medium">{offer.name}</h2>
-                  <p className="text-sm text-muted-foreground">
-                    {offer.offerType} • {offer.redemptionType}
-                  </p>
-                  <div className="flex items-center justify-between text-sm">
-                    <span>Boost: {offer.boost}×</span>
-                    <span>Commission: {offer.commission}%</span>
+                  <h2 className="text-lg font-bold tracking-tighter">
+                    {offer.name}
+                  </h2>
+                  <div className="flex text-sm gap-1">
+                    <Badge className="bg-gray-200 text-gray-900">
+                      {offer.offerType}
+                    </Badge>
+                    <Badge className="bg-gray-200 text-gray-900">
+                      {offer.redemptionType}
+                    </Badge>
+                    {offer.boost ? (
+                      <Badge className="bg-green-400 text-green-950">
+                        boosted
+                      </Badge>
+                    ) : null}
                   </div>
                   <div className="mt-auto space-y-2">
                     <p className="text-xs text-muted-foreground">
